@@ -126,12 +126,21 @@ def getSeleniumWebDriver(headless):
                 options.add_argument(BROWSER_PROFILE)
                 webDriver = webdriver.Firefox(options=options)
             except Exception as e:
-                msg=f"{translation(30012)}{BROWSER_TYPE} Error: {e}"
+                msg=f"{translate(30012)}{BROWSER_TYPE} Error: {e}"
                 xbmc.log(msg,xbmc.LOGERROR)
-                xbmcgui.Dialog().ok(addon_name,msg)
+                xbmcgui.Dialog().ok(ADDON_NAME,msg)
         case "chrome":
-            pass
-        case "edge":
+            try:
+                options= webdriver.ChromeOptions()
+                if headless:
+                    options.add_argument("--headless=new")
+                options.add_argument(f"--user-data-dir={BROWSER_PROFILE}")
+                webDriver = webdriver.Chrome(options=options)
+            except Exception as e:
+                msg=f"{translate(30012)}{BROWSER_TYPE} Error: {e}"
+                xbmc.log(msg,xbmc.LOGERROR)
+                xbmcgui.Dialog().ok(ADDON_NAME,msg)
+        case "msedge":
             try:
                 options= webdriver.EdgeOptions()
                 if headless:
@@ -139,12 +148,12 @@ def getSeleniumWebDriver(headless):
                 options.add_argument(f"--user-data-dir={BROWSER_PROFILE}")
                 webDriver = webdriver.Edge(options=options)
             except Exception as e:
-                msg=f"{translation(30012)}{BROWSER_TYPE} Error: {e}"
+                msg=f"{translate(30012)}{BROWSER_TYPE} Error: {e}"
                 xbmc.log(msg,xbmc.LOGERROR)
-                xbmcgui.Dialog().ok(addon_name,msg)
+                xbmcgui.Dialog().ok(ADDON_NAME,msg)
         case _:
-            xbmc.log(f"{translation(30011)}{BROWSER_TYPE}",xbmc.LOGERROR)
-            xbmcgui.Dialog().ok(addon_name,f"{translation(30011)}{BROWSER_TYPE}")
+            xbmc.log(f"{translate(30011)}{BROWSER_TYPE}",xbmc.LOGERROR)
+            xbmcgui.Dialog().ok(ADDON_NAME,f"{translate(30011)}{BROWSER_TYPE}")
     return webDriver
 
 # Main addon support functions
@@ -733,7 +742,7 @@ def initBrowser():
     global BROWSER_TYPE
     global BROWSER_PROFILE
     
-    BROWSER_TYPE=seleniumSettings.getSetting("Browser")
+    BROWSER_TYPE=seleniumSettings.getSetting("BrowserType")
     while BROWSER_TYPE=="":
         # See if the user wants to configure the selenium browser.
         rc=xbmcgui.Dialog().yesno(ADDON_NAME,translate(30010),translate(30002),translate(30001),0,xbmcgui.DLG_YESNO_YES_BTN)
@@ -741,7 +750,7 @@ def initBrowser():
             return False
         # Try to invoke the selenium configuration module for on-the-fly setup.
         seleniumSettings.openSettings()
-        BROWSER_TYPE=seleniumSettings.getSetting("Browser")
+        BROWSER_TYPE=seleniumSettings.getSetting("BrowserType")
     # Configuration is valid, get the actual profile path to use.
     BROWSER_PROFILE=seleniumSettings.getSetting("BrowserProfile")
     return True
